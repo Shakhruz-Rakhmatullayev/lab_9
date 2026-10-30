@@ -133,3 +133,128 @@ const habitColorChoices = [
 ];
 
 const habitTimes = ['Morning', 'Afternoon', 'Evening', 'Anytime'];
+
+class Product {
+  const Product({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.rating,
+    required this.price,
+    required this.icon,
+    required this.color,
+  });
+
+  final String id;
+  final String title;
+  final String category;
+  final double rating;
+  final double price;
+  final IconData icon;
+  final Color color;
+}
+
+const seedProducts = [
+  Product(
+    id: 'yoga-mat',
+    title: 'Cork yoga mat',
+    category: 'Fitness',
+    rating: 4.8,
+    price: 39.99,
+    icon: Icons.self_improvement_rounded,
+    color: Color(0xFF3C8D7E),
+  ),
+  Product(
+    id: 'bands',
+    title: 'Resistance band set',
+    category: 'Fitness',
+    rating: 4.6,
+    price: 24.50,
+    icon: Icons.fitness_center_rounded,
+    color: Color(0xFFF0782A),
+  ),
+  Product(
+    id: 'bottle',
+    title: 'Smart water bottle',
+    category: 'Hydration',
+    rating: 4.3,
+    price: 49.00,
+    icon: Icons.water_drop_rounded,
+    color: Color(0xFF5B7DB1),
+  ),
+  Product(
+    id: 'roller',
+    title: 'Foam roller',
+    category: 'Recovery',
+    rating: 4.5,
+    price: 19.99,
+    icon: Icons.spa_rounded,
+    color: Color(0xFFB4637A),
+  ),
+  Product(
+    id: 'journal',
+    title: 'Habit journal',
+    category: 'Mindfulness',
+    rating: 4.9,
+    price: 14.00,
+    icon: Icons.edit_note_rounded,
+    color: Color(0xFF8A7A4E),
+  ),
+  Product(
+    id: 'sleep-mask',
+    title: 'Contour sleep mask',
+    category: 'Sleep',
+    rating: 4.4,
+    price: 17.50,
+    icon: Icons.bedtime_rounded,
+    color: Color(0xFF5E6A9E),
+  ),
+  Product(
+    id: 'rope',
+    title: 'Speed jump rope',
+    category: 'Fitness',
+    rating: 4.2,
+    price: 12.99,
+    icon: Icons.directions_run_rounded,
+    color: Color(0xFFF0782A),
+  ),
+  Product(
+    id: 'shaker',
+    title: 'Protein shaker',
+    category: 'Nutrition',
+    rating: 4.1,
+    price: 9.99,
+    icon: Icons.local_drink_rounded,
+    color: Color(0xFF3C8D7E),
+  ),
+];
+
+/// Items that "arrive" on pull-to-refresh, used in order and then repeated.
+const newProductTemplates = [
+  (
+    'Meditation cushion',
+    'Mindfulness',
+    Icons.self_improvement_rounded,
+    Color(0xFF3C8D7E),
+  ),
+  (
+    'Adjustable dumbbells',
+    'Fitness',
+    Icons.fitness_center_rounded,
+    Color(0xFFF0782A),
+  ),
+  (
+    'Electrolyte tabs',
+    'Hydration',
+    Icons.water_drop_rounded,
+    Color(0xFF5B7DB1),
+  ),
+  ('Massage gun', 'Recovery', Icons.spa_rounded, Color(0xFFB4637A)),
+  ('Sunrise alarm', 'Sleep', Icons.wb_twilight_rounded, Color(0xFF5E6A9E)),
+  (
+    'Meal prep containers',
+    'Nutrition',
+    Icons.restaurant_rounded,
+    Color(0xFF8A7A4E),
+  ),
+];

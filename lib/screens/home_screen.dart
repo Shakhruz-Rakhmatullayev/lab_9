@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _padded(
               _TopBar(
                 name: state.userName,
-                onProfile: () => widget.onNavigate(3),
+                onProfile: () => widget.onNavigate(4),
               ),
             ),
             const SizedBox(height: 26),

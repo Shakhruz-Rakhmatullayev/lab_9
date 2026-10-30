@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../widgets/glass.dart';
+import 'catalog_screen.dart';
 import 'habits_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
@@ -28,6 +29,7 @@ class _AppShellState extends State<AppShell> {
       HomeScreen(onNavigate: _go),
       HabitsScreen(onBack: home),
       StatisticScreen(onBack: home),
+      CatalogScreen(onBack: home),
       ProfileScreen(onBack: home),
     ];
 
@@ -93,6 +95,7 @@ class FloatingNavBar extends StatelessWidget {
     (Icons.home_rounded, Icons.home_outlined, 'Home'),
     (Icons.assignment_rounded, Icons.assignment_outlined, 'Habits'),
     (Icons.leaderboard_rounded, Icons.leaderboard_outlined, 'Statistic'),
+    (Icons.storefront_rounded, Icons.storefront_outlined, 'Catalog'),
     (Icons.person_rounded, Icons.person_outline_rounded, 'Profile'),
   ];
 
@@ -158,7 +161,7 @@ class _NavItem extends StatelessWidget {
         duration: const Duration(milliseconds: 340),
         curve: Curves.easeOutCubic,
         height: 54,
-        width: selected ? 128 : 54,
+        width: selected ? 112 : 54,
         decoration: BoxDecoration(
           color: selected ? Colors.white : const Color(0xFFE6ECEA),
           borderRadius: BorderRadius.circular(30),
