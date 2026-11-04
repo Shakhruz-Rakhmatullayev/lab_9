@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../data/sample_data.dart';
+import '../state/cart_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/format.dart';
 import '../widgets/glass.dart';
+import 'cart_screen.dart';
 
 /// Always scrollable so pull-to-refresh works even with few (or no) items.
 const _physics = AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics());
@@ -19,29 +23,12 @@ class CatalogScreen extends StatefulWidget {
 class _CatalogScreenState extends State<CatalogScreen> {
   final List<Product> _products = [...seedProducts];
   bool _grid = false;
-  int _generated = 0;
-
-  Product _newProduct() {
-    final (title, category, icon, color) =
-        newProductTemplates[_generated % newProductTemplates.length];
-    _generated++;
-    final seed = DateTime.now().microsecondsSinceEpoch;
-    return Product(
-      id: 'new-$seed',
-      title: title,
-      category: category,
-      rating: 3.8 + (seed % 12) / 10,
-      price: 9.99 + seed % 60,
-      icon: icon,
-      color: color,
-    );
-  }
 
   Future<void> _refresh() async {
-    // Simulated network request.
+    // Simulated network request; reloading brings back the starter items.
     await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
-    setState(() => _products.insert(0, _newProduct()));
+    _restore();
   }
 
   void _remove(Product p) {
@@ -159,18 +146,34 @@ class _CatalogScreenState extends State<CatalogScreen> {
             child: ScreenHeader(
               title: 'Catalog',
               onBack: widget.onBack,
-              trailing: GlassCircleButton(
-                icon: _grid ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                onTap: () => setState(() => _grid = !_grid),
+              trailing: CartBadgeButton(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const CartScreen()),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 22),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SectionHeader(
-              title: _grid ? 'Grid catalog' : 'List feed',
-              action: '${_products.length} items',
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: SectionHeader(
+                    title: _grid ? 'Grid catalog' : 'List feed',
+                    action: '${_products.length} items',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GlassCircleButton(
+                  size: 40,
+                  icon: _grid
+                      ? Icons.view_list_rounded
+                      : Icons.grid_view_rounded,
+                  onTap: () => setState(() => _grid = !_grid),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -266,9 +269,19 @@ class _ProductRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            _price(product.price),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                formatPrice(product.price),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              _CartToggle(product: product),
+            ],
           ),
         ],
       ),
@@ -315,6 +328,11 @@ class _ProductCard extends StatelessWidget {
                     left: 8,
                     child: StatusChip(label: product.category),
                   ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: _CartToggle(product: product),
+                  ),
                 ],
               ),
             ),
@@ -346,7 +364,7 @@ class _ProductCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
                         child: Text(
-                          _price(product.price),
+                          formatPrice(product.price),
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -362,6 +380,52 @@ class _ProductCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Add to Cart" pill that flips to "In cart" while the product is selected.
+class _CartToggle extends StatelessWidget {
+  const _CartToggle({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final inCart = context.select<CartProvider, bool>(
+      (c) => c.contains(product),
+    );
+    return Pressable(
+      onTap: () => context.read<CartProvider>().toggle(product),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: inCart ? AppColors.orange : AppColors.ink,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              inCart ? Icons.check_rounded : Icons.add_shopping_cart_rounded,
+              size: 14,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              inCart ? 'In cart' : 'Add to Cart',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -418,7 +482,7 @@ class _EmptyCatalog extends StatelessWidget {
               const Text('Catalog is Empty', style: AppText.section),
               const SizedBox(height: 6),
               Text(
-                'Restore the starter items, or pull down to check for new arrivals.',
+                'Restore the starter items, or pull down to reload the catalog.',
                 textAlign: TextAlign.center,
                 style: AppText.caption.copyWith(height: 1.35, fontSize: 13),
               ),
@@ -438,5 +502,3 @@ class _EmptyCatalog extends StatelessWidget {
     );
   }
 }
-
-String _price(double v) => '\$${v.toStringAsFixed(2)}';

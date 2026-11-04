@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:habitflow/data/sample_data.dart';
 import 'package:habitflow/main.dart';
 import 'package:habitflow/state/app_state.dart';
+import 'package:habitflow/utils/format.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -44,7 +45,7 @@ void main() {
     expect(state.doneCount, before + 1);
   });
 
-  testWidgets('catalog toggles views, deletes with undo and refreshes', (
+  testWidgets('catalog toggles views, deletes with undo and reloads', (
     tester,
   ) async {
     await tester.pumpWidget(HabitflowApp(state: AppState()));
@@ -68,10 +69,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(first), findsOneWidget);
 
-    await tester.fling(find.text(first), const Offset(0, 400), 1000);
+    await tester.drag(find.text(first), const Offset(-500, 0));
     await tester.pumpAndSettle();
-    expect(find.text(newProductTemplates.first.$1), findsOneWidget);
-    expect(find.text('${seedProducts.length + 1} items'), findsOneWidget);
+    expect(find.text('${seedProducts.length - 1} items'), findsOneWidget);
+    await tester.fling(
+      find.text(seedProducts[1].title),
+      const Offset(0, 400),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(first), findsOneWidget);
+    expect(find.text('${seedProducts.length} items'), findsOneWidget);
   });
 
   testWidgets('empty catalog can be restored', (tester) async {
@@ -89,6 +97,48 @@ void main() {
     await tester.tap(find.text('Restore catalog'));
     await tester.pumpAndSettle();
     expect(find.text(seedProducts.first.title), findsOneWidget);
+  });
+
+  testWidgets('cart syncs between catalog and cart screen', (tester) async {
+    await tester.pumpWidget(HabitflowApp(state: AppState()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.storefront_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('Add to Cart'), findsNWidgets(6));
+
+    final [a, b, ..._] = seedProducts;
+    await tester.tap(find.text('Add to Cart').at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add to Cart').at(0));
+    await tester.pumpAndSettle();
+    expect(find.text('In cart'), findsNWidgets(2));
+    expect(find.text('2'), findsOneWidget); // AppBar badge
+
+    await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('Total (2 items)'), findsOneWidget);
+    expect(find.text(formatPrice(a.price + b.price)), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Remove ${a.title}'));
+    await tester.pumpAndSettle();
+    expect(find.text('Total (1 items)'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('In cart'), findsOneWidget);
+    expect(find.text('Add to Cart'), findsNWidgets(5));
+
+    await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clear All').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Your cart is empty'), findsOneWidget);
+
+    await tester.tap(find.text('Back to catalog'));
+    await tester.pumpAndSettle();
+    expect(find.text('In cart'), findsNothing);
+    expect(find.text('Add to Cart'), findsNWidgets(6));
   });
 
   test('settings survive an app restart', () async {

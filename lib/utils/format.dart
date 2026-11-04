@@ -31,3 +31,6 @@ String formatThousands(num n) {
 }
 
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// e.g. `24.5` -> `$24.50`
+String formatPrice(double v) => '\$${v.toStringAsFixed(2)}';

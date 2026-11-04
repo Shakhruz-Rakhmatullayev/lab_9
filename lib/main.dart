@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/shell.dart';
 import 'state/app_state.dart';
+import 'state/cart_provider.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -28,15 +30,18 @@ class HabitflowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScope(
       notifier: state,
-      child: ListenableBuilder(
-        listenable: state,
-        builder: (context, _) => MaterialApp(
-          title: 'Habitflow',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: state.themeMode,
-          home: const AppShell(),
+      child: ChangeNotifierProvider(
+        create: (_) => CartProvider(),
+        child: ListenableBuilder(
+          listenable: state,
+          builder: (context, _) => MaterialApp(
+            title: 'Habitflow',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: state.themeMode,
+            home: const AppShell(),
+          ),
         ),
       ),
     );
